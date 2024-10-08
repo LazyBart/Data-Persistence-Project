@@ -2,7 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MenuManager : MonoBehaviour
 {
@@ -10,12 +15,28 @@ public class MenuManager : MonoBehaviour
     public string bestPlayerName; // jmeno hrace drziciho rekord
     public int bestScore; // rekord
     public TMP_InputField inputField;
-    
+    public TextMeshProUGUI highScore;
+    public static MenuManager Instance;
+
+    private void Awake()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         LoadScore();
-        inputField.onEndEdit.AddListener(OnEndEdit);
+        highScore.text = "Best Score: " + bestPlayerName + " - " + bestScore;
+        inputField.onEndEdit.AddListener(OnEndEdit); 
     }
 
     // Datova trida pro serializaci ukladanych dat
@@ -53,5 +74,19 @@ public class MenuManager : MonoBehaviour
     void OnEndEdit (string name)
     {
         playerName = name;
+    }
+
+    private void StartGame()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    public void ExitGame()
+    {
+#if UNITY_EDITOR
+        EditorApplication.ExitPlaymode();
+#else
+        Application.Quit();
+#endif
     }
 }
