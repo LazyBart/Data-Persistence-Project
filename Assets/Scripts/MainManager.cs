@@ -63,7 +63,7 @@ public class MainManager : MonoBehaviour
             }
             if(Input.GetKeyDown(KeyCode.Escape))
             {
-                SceneManager.LoadScene(0);
+                SceneManager.LoadScene("Menu");
             }
         }
     }
@@ -78,13 +78,19 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
-        if(m_Points > MenuManager.Instance.bestScore)
+        MenuManager.SavedData data = new MenuManager.SavedData();
+        data.playerName = MenuManager.Instance.playerName;
+        data.score = m_Points;  // Vytvorime promennou typu SavedData a naplnime ji daty z prave skoncene hry
+        MenuManager.Instance.container.dataList.Add(data);  // Pridame je do vysledneho seznamu
+        MenuManager.Instance.container.dataList.Sort((x, y) => y.score.CompareTo(x.score));  //  Ten setridime podle skore sestupne
+        if (MenuManager.Instance.container.dataList.Count > 5)  // Je-li v seznamu vice nez 5 zaznamu..
         {
-            MenuManager.Instance.bestScore = m_Points;
-            MenuManager.Instance.bestPlayerName = MenuManager.Instance.playerName;
-            DisplayBestPlayer();
-            MenuManager.Instance.SaveScore();
+            MenuManager.Instance.container.dataList.RemoveAt(5);  // ..tak posledni zaznam vymazeme
         }
+        MenuManager.Instance.bestScore = MenuManager.Instance.container.dataList[0].score;  // Aktualizujeme hodnotu rekordu a jmeno jeho drzitele
+        MenuManager.Instance.bestPlayerName = MenuManager.Instance.container.dataList[0].playerName;
+        DisplayBestPlayer();  // A zobrazime jej na obrazovce
+        MenuManager.Instance.SaveScore();  // Nakonec seznam ulozime na disk
     }
 
     private void DisplayBestPlayer()
